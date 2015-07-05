@@ -1,0 +1,23 @@
+{
+    "name": "2upmedia/scout",
+    "description": "Flexible, structured scraping",
+    "authors": [
+        {
+            "name": "Jorge Colon",
+            "email": "info@2upmedia.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+      "ext-xml": "*",
+      "php": ">=5.4"
+    },
+    "require-dev": {
+      "guzzlehttp/guzzle": "~5.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "_2UpMedia\\Scout\\": ["src/", "tests/"]
+        }
+    }
+}

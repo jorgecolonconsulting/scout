@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Web Scraper Testing Ground</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/vendor/modernizr-2.6.1.min.js"></script>
+    <script src="/js/vendor/jquery-1.9.1.min.js"></script>
+    <script src="/js/vendor/jquery-ui-1.10.2.min.js"></script>
+    <script src="/js/plugins.js"></script>
+    <script src="/js/main.js"></script>
+
+    <link rel="stylesheet" href="/css/QapTcha.jquery.css" />
+    <script src="/js/QapTcha.jquery.js"></script>
+
+    <link rel="stylesheet" href="/fancy-captcha/captcha.css" />
+    <script src="/fancy-captcha/jquery.captcha.js"></script>
+
+</head>
+<body>
+<script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-4436411-8']);
+    _gaq.push(['_setDomainName', 'extract-web-data.com']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+</script>
+<!--[if lt IE 7]>
+<p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+<![endif]-->
+<div id="topbar"></div>
+<a href="/" style="text-decoration: none">
+    <div id="title">WEB SCRAPER TESTING GROUND</div>
+    <div id="logo"></div>
+</a>
+<div id="content">
+    <h1>BLOCKS: Price List </h1>
+    <div id="caseinfo">In this test, the web scraper needs to scrape a price list organized in a block layout. Specifically, it has to:
+        <ol>
+            <li>Extract all the products (their names, descriptions and prices), while skipping advertisements</li>
+            <li>Scrape discounted products only</li>
+            <li>Scrape products with red prices only</li>
+        </ol>
+        <p>
+        <p>There is a <b>ver</b> parameter (which varies from 1 to 5) to show different table versions (with different product numbers, best price and advertisement positions).</p>
+        <p>Also there are two tables presented:
+        <ul>
+            <li><b>Case 1</b> (simple one, with products and prices placed into the same block)
+            <li><b>Case 2</b> (complicated one, with products and prices placed into separate blocks)</li>
+        </ul>
+        </p>
+        <p>For testing, you may use the following sample links. The scraper should sufficiently scrape all data from a certain case using the same project:
+        <ul>
+            <li><a href="/blocks?ver=1">Price list 1</a></li>
+            <li><a href="/blocks?ver=2">Price list 2</a></li>
+            <li><a href="/blocks?ver=3">Price list 3</a></li>
+            <li><a href="/blocks?ver=4">Price list 4</a></li>
+            <li><a href="/blocks?ver=5">Price list 5</a></li>
+        </ul>
+        </p>
+    </div>
+
+    <div id="case_blocks">
+
+        <h2>Case 1</h2>
+        <div id="case1">
+            <div class='prod2'><span style='float: left'><div class='name'>Dell Latitude D610-1.73 Laptop Wireless Computer</div>2 GHz Intel Pentium M, 1 GB DDR2 SDRAM, 40 GB, Microsoft Windows XP Professional</span><span style='float: right' >$239.95</span></div><div class='prod1'><span style='float: left'><div class='name'>Samsung Chromebook (Wi-Fi, 11.6-Inch)</div>1.7 GHz, 2 GB DDR3 SDRAM, 16 GB, Chrome</span><span style='float: right' class='best'>$249.00</span><span style='float: right;margin-right:10px' class='best'>BEST<br/>PRICE!</span></div><div class='ads'>ADVERTISEMENT</div><div class='prod2'><span style='float: left'><div class='name'>Apple MacBook Pro MD101LL/A 13.3-Inch Laptop (NEWEST VERSION)</div>2.5 GHz Intel Core i5, 4 GB DDR3 SDRAM, 500 GB Serial ATA, Mac OS X v10.7 Lion</span><span style='float: right' >$1,099.99</span></div><div class='prod1'><span style='float: left'><div class='name'>Acer Aspire AS5750Z-4835 15.6-Inch Laptop (Black)</div>2 GHz Pentium B940, 4 GB SDRAM, 500 GB, Windows 7 Home Premium 64-bit</span><span style='float: right' class='best'>$385.72</span><span style='float: right;margin-right:10px' class='best'>BEST<br/>PRICE!</span></div><div class='ads'>ADVERTISEMENT</div><div class='prod2'><span style='float: left'><div class='name'>HP Pavilion g7-2010nr 17.3-Inch Laptop (Black)</div>2.3 GHz Core i3-2350M, 6 GB SDRAM, 640 GB, Windows 7 Home Premium 64-bit</span><span style='float: right' >$549.99<div class="disc">discount 7%</div></span></div><div class='prod1'><span style='float: left'><div class='name'>ASUS A53Z-AS61 15.6-Inch Laptop (Mocha)</div>1.4 GHz A-Series Quad-Core A6-3420M, 4 GB DIMM, 750 GB, Windows 7 Home Premium 64-bit</span><span style='float: right' >$399.99</span></div></div>
+
+        <h2 style="margin-top: 50px">Case 2</h2>
+        <div id="case2">
+            <div class="left"><div class='prod2'><div class='name'>Dell Latitude D610-1.73 Laptop Wireless Computer</div>2 GHz Intel Pentium M, 1 GB DDR2 SDRAM, 40 GB, Microsoft Windows XP Professional</div><div class='prod1'><div class='name'>Samsung Chromebook (Wi-Fi, 11.6-Inch)</div>1.7 GHz, 2 GB DDR3 SDRAM, 16 GB, Chrome</div><div class='ads'>ADVERTISEMENT</div><div class='prod2'><div class='name'>Apple MacBook Pro MD101LL/A 13.3-Inch Laptop (NEWEST VERSION)</div>2.5 GHz Intel Core i5, 4 GB DDR3 SDRAM, 500 GB Serial ATA, Mac OS X v10.7 Lion</div><div class='prod1'><div class='name'>Acer Aspire AS5750Z-4835 15.6-Inch Laptop (Black)</div>2 GHz Pentium B940, 4 GB SDRAM, 500 GB, Windows 7 Home Premium 64-bit</div></div><div class="right"><div class='price2'>$239.95</div><div class='price1 best'>$249.00</div><div class='ads'></div><div class='price2'>$1,099.99</div><div class='price1 best'>$385.72</div></div><div class="ads" style="clear: both">ADVERTISEMENT</div><div class="left"><div class='prod2'><div class='name'>HP Pavilion g7-2010nr 17.3-Inch Laptop (Black)</div>2.3 GHz Core i3-2350M, 6 GB SDRAM, 640 GB, Windows 7 Home Premium 64-bit</div><div class='prod1'><div class='name'>ASUS A53Z-AS61 15.6-Inch Laptop (Mocha)</div>1.4 GHz A-Series Quad-Core A6-3420M, 4 GB DIMM, 750 GB, Windows 7 Home Premium 64-bit</div></div><div class="right"><div class='price2'>$549.99<div class="disc">discount 7%</div></div><div class='price1'>$399.99</div></div></div>
+
+    </div>
+    <br/><br/><br/>
+</div>
+</body>
+</html>
