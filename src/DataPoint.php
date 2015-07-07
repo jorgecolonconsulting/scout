@@ -60,6 +60,7 @@ class DataPoint implements DataPointInterface, ComposableInterface
 
     /**
      * @param DataPoint $dataPoint
+     * @internal
      */
     public function setParentDataPoint(DataPoint $dataPoint)
     {
@@ -76,10 +77,13 @@ class DataPoint implements DataPointInterface, ComposableInterface
 
     /**
      * @param $queryHandler
+     * @return self
      */
     public function setQueryHandler(QueryHandlerInterface $queryHandler)
     {
         $this->queryHandler = $queryHandler;
+
+        return $this;
     }
 
     /**
@@ -106,10 +110,13 @@ class DataPoint implements DataPointInterface, ComposableInterface
 
     /**
      * @param string $name
+     * @return self
      */
     public function setGroupName($name)
     {
         $this->groupName = $name;
+
+        return $this;
     }
 
     /**
@@ -121,13 +128,31 @@ class DataPoint implements DataPointInterface, ComposableInterface
     }
 
     /**
+     * @param string $selector selector that returns a list of elements as a starting point
+     * @return self
+     */
+    public function setCollection($selector)
+    {
+        $this->setRoot($selector);
+
+        return $this;
+    }
+
+    /**
      * @param string $selector
+     * @return self
      */
     public function setRoot($selector)
     {
         $this->rootSelectorPath = $selector;
+
+        return $this;
     }
 
+    /**
+     * @throws \Exception
+     * @internal
+     */
     public function configureRoot()
     {
         if ($this->rootSelectorPath) {
@@ -139,26 +164,40 @@ class DataPoint implements DataPointInterface, ComposableInterface
 
     /**
      * @param DataPoint $dataPoint
+     * @return self
      */
     public function add(DataPoint $dataPoint)
     {
         $dataPoint->setParentDataPoint($this);
 
         $this->dataPoints[] = $dataPoint;
+
+        return $this;
+    }
+
+    /**
+     * @param $name
+     * @return self
+     */
+    public function forKey($name)
+    {
+        return $this->__invoke($name);
     }
 
     /**
      * @param $xpath
      * @param callable $callable
-     * @param bool $representsCollection
+     * @param bool $isSimpleCollection
+     *
+     * @return self
      */
-    public function set($xpath, callable $callable = null, $representsCollection = false)
+    public function set($xpath, callable $callable = null, $isSimpleCollection = false)
     {
-        if (!isset($this->propertyName)) {
+        if (! isset($this->propertyName)) {
             $this->simpleData = [
                 'xpath' => $xpath,
                 'callable' => $callable,
-                'representsCollection' => $representsCollection
+                'isSimpleCollection' => $isSimpleCollection
             ];
         } else {
             $this->compositeData[$this->propertyName] = [
@@ -166,6 +205,8 @@ class DataPoint implements DataPointInterface, ComposableInterface
                 'callable' => $callable,
             ];
         }
+
+        return $this;
     }
 
     /**
@@ -184,123 +225,10 @@ class DataPoint implements DataPointInterface, ComposableInterface
             $dataPoint->configureRoot();
         }
 
-        if (!empty($this->simpleData)) {
-            $queryHandler->setSelector($this->simpleData['xpath'], $queryHandler->getContext());
-
-            $nodeList = $queryHandler->getData();
-
-            if ($nodeList->length) {
-                if ($this->simpleData['representsCollection']) {
-                    $buffer = [];
-
-                    foreach ($nodeList as $index => $node) {
-                        $value = $node->nodeValue;
-
-                        if ($this->simpleData['callable']) {
-                            try {
-                                $newValue = $this->runCallable(
-                                    $this->simpleData['callable'],
-                                    $node,
-                                    $queryHandler,
-                                    $node,
-                                    $index
-                                );
-                            } catch (SkipException $e) {
-                                continue;
-                            } catch (StopException $e) {
-                                $buffer[] = $value;
-
-                                break;
-                            } catch (CancelException $e) {
-                                $buffer = [];
-
-                                break;
-                            }
-
-                            $value = $newValue;
-                        }
-
-                        $buffer[] = $value;
-                    }
-
-                    return $buffer;
-                }
-
-                $item = $nodeList->item(0);
-                $return = $item->nodeValue;
-
-                if ($this->simpleData['callable']) {
-                    $callableReturn = null;
-
-                    try {
-                        $callableReturn = $this->runCallable(
-                            $this->simpleData['callable'],
-                            $item,
-                            $queryHandler,
-                            $item,
-                            null
-                        );
-                    } catch (CancelException $e) {
-                        return null;
-                    } catch (StopException $e) {
-                        $callableReturn = $return;
-                    } catch (SkipException $e) {
-                        (string)$e; // placeholder so that code coverage runs this line
-                    }
-
-                    return $callableReturn;
-                }
-            }
-        } elseif (!empty($this->compositeData)) {
-            $nodes = $queryHandler->getData();
-
-            $return = [];
-
-            $stopIteration = false;
-
-            foreach ($nodes as $index => $node) {
-                $lastKey = $this->lastArrayKey($this->compositeData);
-
-                foreach ($this->compositeData as $name => $meta) {
-                    $queryHandler->setSelector($meta['xpath'], $node);
-                    $nodeList = $queryHandler->getData();
-                    $item = $nodeList->item(0); // TODO: abstract this so there isn't a hard dependency to \DOMNodeList
-                    $buffer = $nodeList->length ? $item->nodeValue : null;
-
-                    if (!isset($return[$index])) {
-                        $return[$index] = [];
-                    }
-
-                    $childReturn = $this->runChildDataPoints($return[$index]);
-
-                    if (!empty($childReturn)) {
-                        $return[$index] = array_merge($return[$index], $childReturn);
-                    }
-
-                    if ($meta['callable']) {
-                        try {
-                            $buffer = $this->runCallable($meta['callable'], $item, $queryHandler, $item, $index);
-                        } catch (SkipException $e) {
-                            unset($return[$index]);
-
-                            continue 2;
-                        } catch (StopException $e) {
-                            $stopIteration = true;
-                        } catch (CancelException $e) {
-                            $return = [];
-                            break 2;
-                        }
-                    }
-
-                    $return[$index][$name] = $buffer;
-
-                    if ($stopIteration && $name === $lastKey) {
-                        $stopIteration = false;
-
-                        break 2;
-                    }
-                }
-            }
+        if (! empty($this->simpleData)) {
+            return $this->handleSimpleData($queryHandler);
+        } elseif (! empty($this->compositeData)) {
+            return $this->handleCompositeDate($queryHandler);
         } else {
             $return = $this->runChildDataPoints($return);
         }
@@ -309,12 +237,12 @@ class DataPoint implements DataPointInterface, ComposableInterface
     }
 
     /**
-     * @param $dataPointName
+     * @param $keyName
      * @return $this
      */
-    public function __invoke($dataPointName)
+    public function __invoke($keyName)
     {
-        $this->propertyName = $dataPointName;
+        $this->propertyName = $keyName;
 
         return $this;
     }
@@ -327,7 +255,7 @@ class DataPoint implements DataPointInterface, ComposableInterface
      * @param $index
      * @return bool
      */
-    public function runCallable(
+    protected function runCallable(
         callable $callable,
         $dataPointElement,
         QueryHandlerInterface $queryHandler,
@@ -345,6 +273,139 @@ class DataPoint implements DataPointInterface, ComposableInterface
         return $returnValue;
     }
 
+    public function handleCompositeDate(QueryHandlerInterface $queryHandler)
+    {
+        $nodes = $queryHandler->getData();
+
+        $return = [];
+
+        $stopIteration = false;
+
+        foreach ($nodes as $index => $node) {
+            $lastKey = $this->lastArrayKey($this->compositeData);
+
+            foreach ($this->compositeData as $name => $meta) {
+                $queryHandler->setSelector($meta['xpath'], $node);
+                $nodeList = $queryHandler->getData();
+                $item = $nodeList->item(0); // TODO: abstract this so there isn't a hard dependency to \DOMNodeList
+                $buffer = $nodeList->length ? $item->nodeValue : null;
+
+                if (! isset($return[$index])) {
+                    $return[$index] = [];
+                }
+
+                $childReturn = $this->runChildDataPoints($return[$index]);
+
+                if (! empty($childReturn)) {
+                    $return[$index] = array_merge($return[$index], $childReturn);
+                }
+
+                if ($meta['callable']) {
+                    try {
+                        $buffer = $this->runCallable($meta['callable'], $item, $queryHandler, $item, $index);
+                    } catch (SkipException $e) {
+                        unset($return[$index]);
+
+                        continue 2;
+                    } catch (StopException $e) {
+                        $stopIteration = true;
+                    } catch (CancelException $e) {
+                        $return = [];
+                        break 2;
+                    }
+                }
+
+                $return[$index][$name] = $buffer;
+
+                if ($stopIteration && $name === $lastKey) {
+                    $stopIteration = false;
+
+                    break 2;
+                }
+            }
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param QueryHandlerInterface $queryHandler
+     * @return array|bool|null
+     */
+    public function handleSimpleData(QueryHandlerInterface $queryHandler)
+    {
+        $return = null;
+
+        $queryHandler->setSelector($this->simpleData['xpath'], $queryHandler->getContext());
+
+        $nodeList = $queryHandler->getData();
+
+        if ($nodeList->length) {
+            if ($this->simpleData['isSimpleCollection']) {
+                $buffer = [];
+
+                foreach ($nodeList as $index => $node) {
+                    $value = $node->nodeValue;
+
+                    if ($this->simpleData['callable']) {
+                        try {
+                            $newValue = $this->runCallable(
+                                $this->simpleData['callable'],
+                                $node,
+                                $queryHandler,
+                                $node,
+                                $index
+                            );
+                        } catch (SkipException $e) {
+                            continue;
+                        } catch (StopException $e) {
+                            $buffer[] = $value;
+
+                            break;
+                        } catch (CancelException $e) {
+                            $buffer = [];
+
+                            break;
+                        }
+
+                        $value = $newValue;
+                    }
+
+                    $buffer[] = $value;
+                }
+
+                return $buffer;
+            }
+
+            $item = $nodeList->item(0);
+            $return = $item->nodeValue;
+
+            if ($this->simpleData['callable']) {
+                $callableReturn = null;
+
+                try {
+                    $callableReturn = $this->runCallable(
+                        $this->simpleData['callable'],
+                        $item,
+                        $queryHandler,
+                        $item,
+                        null
+                    );
+                } catch (CancelException $e) {
+                    return null;
+                } catch (StopException $e) {
+                    $callableReturn = $return;
+                } catch (SkipException $e) {
+                    (string)$e; // placeholder so that code coverage runs this line
+                }
+
+                return $callableReturn;
+            }
+        }
+
+        return $return;
+    }
+
     /**
      * @param $return
      * @return array
@@ -352,7 +413,7 @@ class DataPoint implements DataPointInterface, ComposableInterface
      */
     private function runChildDataPoints($return)
     {
-        if (!empty($this->dataPoints)) {
+        if (! empty($this->dataPoints)) {
             $buffer = [];
 
             foreach ($this->dataPoints as $dataPoint) {
@@ -363,7 +424,7 @@ class DataPoint implements DataPointInterface, ComposableInterface
                 }
             }
 
-            if (!is_array($return) && empty($return)) {
+            if (! is_array($return) && empty($return)) {
                 $return = [];
             }
 

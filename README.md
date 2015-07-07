@@ -34,9 +34,59 @@ This is currently in stable beta and I encourage submitting tickets for bug, fee
 - Transform XML responses from your webservice into JSON
 - Anything else that involves transforming XML/HTML to a data structure _you_ want.
 
+## Consulting
+
+For consulting, contact <a href="mailto:jorge@2upmedia.com&subject=Consulting Needed">jorge@2upmedia.com</a>
+
 ## Examples
+
+```php
+<?php
+
+$queryHandler = new Xpath(Html::parseDocument(file_get_contents('./tests/fixtures/header-and-table.html')));
+
+$titlesAndPrices = (new DataPoint())->setQueryHandler($queryHandler);
+
+$data = $titlesAndPrices
+    ->setCollection('//table/tr')
+    ->forKey('title')->set('./td[1]') // each tr is used as a context, so the key selectors should use "." to be relative to it
+    ->forKey('price')->set('./td[2]')
+    ->getData();
+/*
+    array (
+      0 => 
+      array (
+        'title' => 'Title #1',
+        'price' => '$10.00',
+      ),
+      1 => 
+      array (
+        'title' => 'Title #2',
+        'price' => '$23.20',
+      ),
+      2 => 
+      array (
+        'title' => 'Title #3',
+        'price' => '$1.00',
+      ),
+      3 => 
+      array (
+        'title' => 'Title #4',
+        'price' => '$5.00',
+      ),
+    )
+*/
+```
 
 - [Get Google Rankings for the keyword "green lasers"](examples/google-search-results.php)
 - [Parse Authentic Jobs feed for Ruby jobs](examples/parse-job-feed.php)
 
 For more information on how to use the API please have a look at the [integration test](tests/integration/UseCaseTest.php).
+
+## XPath Primer
+
+Currently XPath is used as the query language. XPath is simple to use after a little bit of practice.
+
+The core of XPath is the "path". If you understand file paths and URLs, you understand half of XPath already.
+
+Read up on the syntax: http://www.w3schools.com/xpath/xpath_syntax.asp. Then have a look at the [XPath Primer example](examples/xpath-primer.php).

@@ -11,20 +11,20 @@ use GuzzleHttp\Client;
 $url = 'https://authenticjobs.com/rss/custom.php?terms=&amp%3btype=3,2,6&amp%3bcats=&amp%3bonlyremote=1&amp%3blocation=';
 
 $contents = (new Client())->get($url)->getBody();
-$xpathDocument = new Xpath(Xml::parseDocument($contents));
+$queryHandler = new Xpath(Xml::parseDocument($contents)); // we can parse XML documents too
 
-$phpJobs = new DataPoint();
-$phpJobs->setQueryHandler($xpathDocument);
-$phpJobs->setRoot(".//item");
-$phpJobs('title')->set('.//title');
-$phpJobs('description')->set('.//description', function ($value) {
+$rubyJobs = new DataPoint();
+$rubyJobs->setQueryHandler($queryHandler);
+$rubyJobs->setRoot(".//item");
+$rubyJobs('title')->set('.//title'); // calling the object as a function is shorthand for $phpJobs->forKey('title')->
+$rubyJobs('description')->set('.//description', function ($value) {
     if (stripos($value, 'Ruby') === false) {
-        throw new SkipException();
+        throw new SkipException(); // skips information we don't care about
     }
 
     return $value;
 });
-$phpJobs('link')->set('.//link');
-$phpJobs('date')->set('.//pubDate');
+$rubyJobs('link')->set('.//link');
+$rubyJobs('date')->set('.//pubDate');
 
-var_dump($phpJobs->getData());
+var_dump($rubyJobs->getData());

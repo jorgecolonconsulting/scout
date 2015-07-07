@@ -60,9 +60,57 @@ class UseCaseTest extends PHPUnit_Framework_TestCase {
 
 		$computersDetailsDp = new DataPoint();
 		$computersDetailsDp->setQueryHandler($queryHandler);
-		$computersDetailsDp->setRoot("id('case1')/div[@class='prod1' or @class='prod2']");
+		$computersDetailsDp->setCollection("id('case1')/div[@class='prod1' or @class='prod2']");
 		$computersDetailsDp('name')->set('.//div[@class="name"]/text()');
 		$computersDetailsDp('price')->set('.//span[2]/text()');
+
+		$computerDetails = $computersDetailsDp->getData();
+
+		$expect = array (
+			0 =>
+				array (
+					'name' => 'Dell Latitude D610-1.73 Laptop Wireless Computer',
+					'price' => '$239.95',
+				),
+			1 =>
+				array (
+					'name' => 'Samsung Chromebook (Wi-Fi, 11.6-Inch)',
+					'price' => '$249.00',
+				),
+			2 =>
+				array (
+					'name' => 'Apple MacBook Pro MD101LL/A 13.3-Inch Laptop (NEWEST VERSION)',
+					'price' => '$1,099.99',
+				),
+			3 =>
+				array (
+					'name' => 'Acer Aspire AS5750Z-4835 15.6-Inch Laptop (Black)',
+					'price' => '$385.72',
+				),
+			4 =>
+				array (
+					'name' => 'HP Pavilion g7-2010nr 17.3-Inch Laptop (Black)',
+					'price' => '$549.99',
+				),
+			5 =>
+				array (
+					'name' => 'ASUS A53Z-AS61 15.6-Inch Laptop (Mocha)',
+					'price' => '$399.99',
+				),
+		);
+
+		$this->assertEquals($expect, $computerDetails);
+	}
+
+    public function testCollectionOfCompositeValuesWithForKey()
+	{
+		$queryHandler = $this->queryHandler;
+
+		$computersDetailsDp = new DataPoint();
+		$computersDetailsDp->setQueryHandler($queryHandler);
+		$computersDetailsDp->setCollection("id('case1')/div[@class='prod1' or @class='prod2']");
+		$computersDetailsDp->forKey('name')->set('.//div[@class="name"]/text()');
+		$computersDetailsDp->forKey('price')->set('.//span[2]/text()');
 
 		$computerDetails = $computersDetailsDp->getData();
 
@@ -113,7 +161,7 @@ class UseCaseTest extends PHPUnit_Framework_TestCase {
 		$headerDp->set('id("title")/text()');
 
 		$computersDetailsDp = new DataPoint('computers');
-		$computersDetailsDp->setRoot("id('case1')/div[@class='prod1' or @class='prod2']");
+		$computersDetailsDp->setCollection("id('case1')/div[@class='prod1' or @class='prod2']");
 		$computersDetailsDp('name')->set('.//div[@class="name"]/text()');
 		$computersDetailsDp('price')->set('.//span[2]/text()');
 
@@ -269,7 +317,7 @@ class UseCaseTest extends PHPUnit_Framework_TestCase {
 		$queryHandler = $this->queryHandler;
 
 		$computersDetailsDp = new DataPoint();
-		$computersDetailsDp->setRoot("id('case1')/div[@class='prod1' or @class='prod2']");
+		$computersDetailsDp->setCollection("id('case1')/div[@class='prod1' or @class='prod2']");
 		$computersDetailsDp('name')->set(
 			'.//div[@class="name"]/text()',
 			function ($value, $queryHandler, $item, $index) use ($self) {
@@ -472,7 +520,7 @@ class UseCaseTest extends PHPUnit_Framework_TestCase {
 		$queryHandler = $this->queryHandler;
 
 		$computersDetailsDp = new DataPoint();
-		$computersDetailsDp->setRoot("id('case1')/div[@class='prod1' or @class='prod2']");
+		$computersDetailsDp->setCollection("id('case1')/div[@class='prod1' or @class='prod2']");
 
 		$computersDetailsDp('name')->set(
 			'.//div[@class="name"]/text()',
@@ -506,7 +554,7 @@ class UseCaseTest extends PHPUnit_Framework_TestCase {
 		$queryHandler = $this->queryHandler;
 
 		$computersDetailsDp = new DataPoint();
-		$computersDetailsDp->setRoot("id('case1')/div[@class='prod1' or @class='prod2']");
+		$computersDetailsDp->setCollection("id('case1')/div[@class='prod1' or @class='prod2']");
 
 		$computersDetailsDp('name')->set('.//div[@class="name"]/text()');
 		$computersDetailsDp('price')->set(
@@ -553,7 +601,7 @@ class UseCaseTest extends PHPUnit_Framework_TestCase {
 		$queryHandler = $this->queryHandler;
 
 		$computersDetailsDp = new DataPoint();
-		$computersDetailsDp->setRoot("id('case1')/div[@class='prod1' or @class='prod2']");
+		$computersDetailsDp->setCollection("id('case1')/div[@class='prod1' or @class='prod2']");
 
 		$computersDetailsDp('name')->set(
 			'.//div[@class="name"]/text()',
