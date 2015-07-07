@@ -15,6 +15,7 @@ This is currently in stable beta and I encourage submitting tickets for bug, fee
 
 - Document types: HTML and XML
 - Querying: XPath
+- PHP 5.4+, including PHP 7!
  
 ## Planned for the future
 
