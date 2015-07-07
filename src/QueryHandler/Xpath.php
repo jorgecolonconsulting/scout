@@ -74,39 +74,38 @@ class Xpath extends Base implements QueryHandlerInterface
 
     /**
      * @param $selectorPath
+     * @return self
      */
     public function setRoot($selectorPath)
     {
         $this->rootPath = $this->selector = $selectorPath;
 
-        $this->configureRoot();
-    }
-
-    /**
-     * Sets document to the root selector so that the current node points to it
-     */
-    protected function configureRoot()
-    {
-        $this->domXpath->evaluate($this->rootPath);
+        return $this;
     }
 
     /**
      * @param string $selector xpath selector
      * @param \DOMNode $context (optional), defaults to null
+     * @return self
      */
     public function setSelector($selector, $context = null)
     {
         $this->selector = $selector;
 
         $this->setContext($context);
+
+        return $this;
     }
 
     /**
      * @param null|\DOMNode $context
+     * @return self
      */
     public function setContext($context)
     {
         $this->context = $context;
+
+        return $this;
     }
 
     /**
