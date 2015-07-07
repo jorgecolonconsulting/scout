@@ -230,10 +230,8 @@ class DataPoint implements DataPointInterface, ComposableInterface
         } elseif (! empty($this->compositeData)) {
             return $this->handleCompositeDate($queryHandler);
         } else {
-            $return = $this->runChildDataPoints($return);
+            return $this->runChildDataPoints($return);
         }
-
-        return $return;
     }
 
     /**
@@ -342,64 +340,14 @@ class DataPoint implements DataPointInterface, ComposableInterface
 
         if ($nodeList->length) {
             if ($this->simpleData['isSimpleCollection']) {
-                $buffer = [];
-
-                foreach ($nodeList as $index => $node) {
-                    $value = $node->nodeValue;
-
-                    if ($this->simpleData['callable']) {
-                        try {
-                            $newValue = $this->runCallable(
-                                $this->simpleData['callable'],
-                                $node,
-                                $queryHandler,
-                                $node,
-                                $index
-                            );
-                        } catch (SkipException $e) {
-                            continue;
-                        } catch (StopException $e) {
-                            $buffer[] = $value;
-
-                            break;
-                        } catch (CancelException $e) {
-                            $buffer = [];
-
-                            break;
-                        }
-
-                        $value = $newValue;
-                    }
-
-                    $buffer[] = $value;
-                }
-
-                return $buffer;
+                return $this->handleSimpleCollection($queryHandler, $nodeList);
             }
 
             $item = $nodeList->item(0);
             $return = $item->nodeValue;
 
             if ($this->simpleData['callable']) {
-                $callableReturn = null;
-
-                try {
-                    $callableReturn = $this->runCallable(
-                        $this->simpleData['callable'],
-                        $item,
-                        $queryHandler,
-                        $item,
-                        null
-                    );
-                } catch (CancelException $e) {
-                    return null;
-                } catch (StopException $e) {
-                    $callableReturn = $return;
-                } catch (SkipException $e) {
-                    (string)$e; // placeholder so that code coverage runs this line
-                }
-
-                return $callableReturn;
+                return $this->handleSimpleDataCallable($queryHandler, $item, $return);
             }
         }
 
@@ -441,5 +389,76 @@ class DataPoint implements DataPointInterface, ComposableInterface
         end($array);
 
         return key($array);
+    }
+
+    /**
+     * @param QueryHandlerInterface $queryHandler
+     * @param $nodeList
+     * @return array
+     */
+    private function handleSimpleCollection(QueryHandlerInterface $queryHandler, $nodeList)
+    {
+        $buffer = [];
+
+        foreach ($nodeList as $index => $node) {
+            $value = $node->nodeValue;
+
+            if ($this->simpleData['callable']) {
+                try {
+                    $newValue = $this->runCallable(
+                        $this->simpleData['callable'],
+                        $node,
+                        $queryHandler,
+                        $node,
+                        $index
+                    );
+                } catch (SkipException $e) {
+                    continue;
+                } catch (StopException $e) {
+                    $buffer[] = $value;
+
+                    break;
+                } catch (CancelException $e) {
+                    $buffer = [];
+
+                    break;
+                }
+
+                $value = $newValue;
+            }
+
+            $buffer[] = $value;
+        }
+
+        return $buffer;
+    }
+
+    /**
+     * @param QueryHandlerInterface $queryHandler
+     * @param $item
+     * @param $return
+     * @return bool|null
+     */
+    private function handleSimpleDataCallable(QueryHandlerInterface $queryHandler, $item, $return)
+    {
+        $callableReturn = null;
+
+        try {
+            $callableReturn = $this->runCallable(
+                $this->simpleData['callable'],
+                $item,
+                $queryHandler,
+                $item,
+                null
+            );
+        } catch (CancelException $e) {
+            return null;
+        } catch (StopException $e) {
+            $callableReturn = $return;
+        } catch (SkipException $e) {
+            (string)$e; // placeholder so that code coverage runs this line
+        }
+
+        return $callableReturn;
     }
 }
